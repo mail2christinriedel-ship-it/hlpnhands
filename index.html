@@ -848,9 +848,12 @@
       <button class="filter-chip active" onclick="setFilter('alle', this)">Alle</button>
       <button class="filter-chip" onclick="setFilter('angebot', this)">Angebote</button>
       <button class="filter-chip" onclick="setFilter('gesuch', this)">Gesuche</button>
-      <button class="filter-chip" onclick="setFilter('haushalt', this)">Haushalt</button>
-      <button class="filter-chip" onclick="setFilter('transport', this)">Transport</button>
-      <button class="filter-chip" onclick="setFilter('gesellschaft', this)">Gesellschaft</button>
+      <button class="filter-chip" onclick="setFilter('haushalt', this)">Haushalt & Garten</button>
+      <button class="filter-chip" onclick="setFilter('betreuung', this)">Betreuung</button>
+      <button class="filter-chip" onclick="setFilter('handwerk', this)">Handwerkliches</button>
+      <button class="filter-chip" onclick="setFilter('nachhilfe', this)">Nachhilfe & Wissen</button>
+      <button class="filter-chip" onclick="setFilter('beauty', this)">Beauty & Wellness</button>
+      <button class="filter-chip" onclick="setFilter('gemeinnuetzig', this)">Gemeinnützig</button>
       <button class="filter-chip" onclick="setFilter('sonstiges', this)">Sonstiges</button>
     </div>
 
@@ -917,13 +920,12 @@
       <div class="form-field">
         <label>Kategorie</label>
         <select id="post-category">
-          <option value="haushalt">Haushalt & Reinigung</option>
-          <option value="transport">Transport & Einkaufen</option>
-          <option value="gesellschaft">Gesellschaft & Gespräch</option>
-          <option value="handwerk">Handwerk & Reparatur</option>
-          <option value="digital">Digital & Technik</option>
-          <option value="kinder">Kinder & Familie</option>
-          <option value="tiere">Tiere</option>
+          <option value="haushalt">Haushalt & Garten</option>
+          <option value="betreuung">Betreuung</option>
+          <option value="handwerk">Handwerkliches</option>
+          <option value="nachhilfe">Nachhilfe & Wissen</option>
+          <option value="beauty">Beauty, Wellness & Lifestyle</option>
+          <option value="gemeinnuetzig">Gemeinnützig</option>
           <option value="sonstiges">Sonstiges</option>
         </select>
       </div>
@@ -1297,7 +1299,7 @@ function timeAgo(dateStr) {
 }
 
 function categoryLabel(c) {
-  const map = { haushalt:'Haushalt', transport:'Transport', gesellschaft:'Gesellschaft', handwerk:'Handwerk', digital:'Digital', kinder:'Familie', tiere:'Tiere', sonstiges:'Sonstiges' };
+  const map = { haushalt:'Haushalt & Garten', betreuung:'Betreuung', handwerk:'Handwerkliches', nachhilfe:'Nachhilfe & Wissen', beauty:'Beauty & Wellness', gemeinnuetzig:'Gemeinnützig', sonstiges:'Sonstiges' };
   return map[c] || c;
 }
 
