@@ -185,7 +185,16 @@
   <!-- MAIN -->
   <div id="screen-main" class="screen">
     <div class="topnav">
-      <span class="topnav-logo">hlpnhands</span>
+      <span class="topnav-logo" onclick="setTab('feed', document.getElementById('tab-feed'))" style="cursor:pointer; display:flex; align-items:center; gap:0.6rem;">
+        <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" stroke="#f5f0e8" stroke-width="5"/>
+          <path d="M30 62 C30 62 35 52 50 52 C65 52 70 62 70 62" stroke="#f5f0e8" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path d="M35 55 Q30 48 38 44 Q46 40 50 46 Q54 40 62 44 Q70 48 65 55" stroke="#f5f0e8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+          <path d="M50 46 L50 38" stroke="#f5f0e8" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="50" cy="33" r="4" fill="#f5f0e8"/>
+        </svg>
+        hlpnhands
+      </span>
       <button class="icon-btn" onclick="showScreen('profile')">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </button>
@@ -275,9 +284,14 @@
         <label>Standort</label>
         <div class="field-row">
           <select id="post-land">
-            <option value="AT">🇦🇹 AT</option>
-            <option value="DE">🇩🇪 DE</option>
-            <option value="CH">🇨🇭 CH</option>
+            <option value="AT">🇦🇹 Österreich</option>
+            <option value="DE">🇩🇪 Deutschland</option>
+            <option value="CH">🇨🇭 Schweiz</option>
+            <option value="IT">🇮🇹 Italien (Südtirol)</option>
+            <option value="LU">🇱🇺 Luxemburg</option>
+            <option value="LI">🇱🇮 Liechtenstein</option>
+            <option value="BE">🇧🇪 Belgien</option>
+            <option value="NL">🇳🇱 Niederlande</option>
           </select>
           <input type="text" id="post-plz" placeholder="PLZ" maxlength="5" inputmode="numeric">
         </div>
@@ -305,6 +319,12 @@
 
   <!-- PROFILE -->
   <div id="screen-profile" class="screen">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('main')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Mein Profil</h2>
+    </div>
     <div class="profile-header">
       <div class="avatar" id="profile-avatar">?</div>
       <div class="profile-name" id="profile-name">Lädt...</div>
@@ -318,7 +338,16 @@
           <div class="inline-field">
             <label>Heimatland & PLZ</label>
             <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.5rem;">
-              <select id="profile-land"><option value="AT">🇦🇹 AT</option><option value="DE">🇩🇪 DE</option><option value="CH">🇨🇭 CH</option></select>
+              <select id="profile-land">
+                <option value="AT">🇦🇹 Österreich</option>
+                <option value="DE">🇩🇪 Deutschland</option>
+                <option value="CH">🇨🇭 Schweiz</option>
+                <option value="IT">🇮🇹 Italien (Südtirol)</option>
+                <option value="LU">🇱🇺 Luxemburg</option>
+                <option value="LI">🇱🇮 Liechtenstein</option>
+                <option value="BE">🇧🇪 Belgien</option>
+                <option value="NL">🇳🇱 Niederlande</option>
+              </select>
               <input type="text" id="profile-plz" placeholder="PLZ" maxlength="5" inputmode="numeric">
             </div>
           </div>
@@ -508,7 +537,7 @@ async function loadFeed() {
   const { data, error } = await query.limit(50);
   if (error) { el.innerHTML='<div class="empty-state"><p>Fehler beim Laden.</p></div>'; return; }
   if (!data||data.length===0) {
-    el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Sei der Erste! Erstelle ein Angebot oder ein Gesuch.</p></div>`;
+    el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Noch nichts hier – erstelle das erste Angebot oder Gesuch! Erstelle ein Angebot oder ein Gesuch.</p></div>`;
     return;
   }
   el.innerHTML = data.map((p,i) => renderCard(p,i)).join('');
@@ -519,7 +548,7 @@ async function loadMyPosts() {
   const el = document.getElementById('feed-content');
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   const { data } = await sb.from('posts').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-  if (!data||data.length===0) { el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Du hast noch nichts erstellt.</p></div>`; return; }
+  if (!data||data.length===0) { el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Du hast noch keine Angebote oder Gesuche erstellt.</p></div>`; return; }
   el.innerHTML = data.map((p,i) => renderCard(p,i)).join('');
 }
 
