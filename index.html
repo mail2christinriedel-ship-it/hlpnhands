@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1B2B5E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="hlpnhands">
+  <title>hlpnhands</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1B2B5E;
+      --navy-light: #2a3d7a;
+      --cream: #f5f0e8;
+      --cream-dark: #ede6d6;
+      --text: #1a1a2e;
+      --text-muted: #6b6b8a;
+      --white: #ffffff;
+      --accent: #e8825a;
+      --success: #2d8c6e;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* SCREENS */
+    .screen { display: none; flex-direction: column; min-height: 100vh; }
+    .screen.active { display: flex; }
+
+    /* AUTH SCREEN */
+    #screen-auth {
+      background: var(--navy);
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .auth-logo {
+      text-align: center;
+    }
+
+    .auth-logo h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem;
+      color: var(--cream);
+      letter-spacing: -0.5px;
+    }
+
+    .auth-logo p {
+      color: rgba(245,240,232,0.6);
+      font-size: 0.85rem;
+      font-weight: 300;
+      margin-top: 0.5rem;
+    }
+
+    .auth-card {
+      background: var(--cream);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+    }
+
+    .auth-card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      background: var(--cream-dark);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--white);
+      color: var(--navy);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--navy);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.95rem;
+      background: var(--navy);
+      color: var(--cream);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: var(--navy-light); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .auth-msg {
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 1rem;
+      color: var(--text-muted);
+    }
+
+    .auth-msg.error { color: #c0392b; }
+    .auth-msg.success { color: var(--success); }
+
+    /* TOP NAV */
+    .topnav {
+      background: var(--navy);
+      padding: 1rem 1.25rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topnav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--cream);
+    }
+
+    .topnav-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      background: rgba(245,240,232,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--cream);
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover { background: rgba(245,240,232,0.25); }
+
+    /* BOTTOM NAV */
+    .bottomnav {
+      background: var(--white);
+      border-top: 1px solid rgba(27,43,94,0.1);
+      padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+      display: flex;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 0.4rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active { color: var(--navy); }
+    .nav-item svg { width: 22px; height: 22px; }
+
+    /* FEED */
+    .feed-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .feed-filter {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .feed-filter::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      padding: 0.4rem 0.9rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 20px;
+      background: var(--white);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-chip.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--cream);
+    }
+
+    .post-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      border: 1px solid rgba(27,43,94,0.08);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .post-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(27,43,94,0.1);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .post-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .post-type.angebot {
+      background: rgba(45,140,110,0.12);
+      color: var(--success);
+    }
+
+    .post-type.gesuch {
+      background: rgba(232,130,90,0.12);
+      color: var(--accent);
+    }
+
+    .post-distance {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .post-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      color: var(--navy);
+      margin-bottom: 0.4rem;
+      line-height: 1.3;
+    }
+
+    .post-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid rgba(27,43,94,0.06);
+    }
+
+    .post-category {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      background: var(--cream);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .post-time {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--navy);
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: calc(5rem + env(safe-area-inset-bottom));
+      right: 1.25rem;
+      width: 58px;
+      height: 58px;
+      background: var(--accent);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(232,130,90,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 90;
+    }
+
+    .fab:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(232,130,90,0.5); }
+    .fab:active { transform: scale(0.95); }
+    .fab svg { width: 26px; height: 26px; color: white; }
+
+    /* POST FORM SCREEN */
+    #screen-post {
+      background: var(--cream);
+    }
+
+    .form-header {
+      background: var(--navy);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(245,240,232,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--cream);
+    }
+
+    .form-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
+    }
+
+    .form-body {
+      flex: 1;
+      padding: 1.5rem 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .type-option {
+      padding: 1rem;
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius);
+      background: var(--white);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .type-option.selected.angebot {
+      border-color: var(--success);
+      background: rgba(45,140,110,0.05);
+    }
+
+    .type-option.selected.gesuch {
+      border-color: var(--accent);
+      background: rgba(232,130,90,0.05);
+    }
+
+    .type-option .type-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .type-option .type-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .type-option .type-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-field input,
+    .form-field textarea,
+    .form-field select {
+      padding: 0.85rem 1rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .form-field textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .form-field select:focus {
+      border-color: var(--navy);
+    }
+
+    .location-field {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .location-field input { flex: 1; }
+
+    .btn-locate {
+      padding: 0 1rem;
+      background: var(--navy);
+      color: var(--cream);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-locate:hover { background: var(--navy-light); }
+
+    .submit-area {
+      padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    /* PROFILE SCREEN */
+    #screen-profile {
+      background: var(--cream);
+    }
+
+    .profile-header {
+      background: var(--navy);
+      padding: 2rem 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--navy);
+    }
+
+    .profile-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
+    }
+
+    .profile-email {
+      font-size: 0.8rem;
+      color: rgba(245,240,232,0.6);
+    }
+
+    .profile-body {
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .profile-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .profile-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid rgba(27,43,94,0.08);
+    }
+
+    .profile-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(27,43,94,0.06);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .profile-item:last-child { border-bottom: none; }
+    .profile-item:hover { background: var(--cream); }
+
+    .profile-item-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .profile-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy);
+    }
+
+    .profile-item-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .profile-item-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      width: 100%;
+      padding: 0.95rem;
+      background: transparent;
+      color: #c0392b;
+      border: 1.5px solid rgba(192,57,43,0.3);
+      border-radius: var(--radius-sm);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-logout:hover { background: rgba(192,57,43,0.05); }
+
+    /* NOTIFICATION PERMISSION BANNER */
+    .notif-banner {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .notif-banner p {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .btn-notif {
+      padding: 0.4rem 0.9rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: calc(6rem + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--navy);
+      color: var(--cream);
+      padding: 0.7rem 1.25rem;
+      border-radius: 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 200;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--cream-dark);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .post-card { animation: fadeUp 0.3s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- AUTH SCREEN -->
+  <div id="screen-auth" class="screen active">
+    <div class="auth-logo">
+      <h1>hlpnhands</h1>
+      <p>Hilfe geben. Hilfe finden. Einfach so.</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Anmelden</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Registrieren</button>
+      </div>
+      <div id="auth-login">
+        <div class="form-group">
+          <label>E-Mail</label>
+          <input type="email" id="login-email" placeholder="deine@email.at" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Passwort</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" onclick="doLogin()" id="btn-login">Anmelden</button>
+        <p class="auth-msg" id="login-msg"></p>
+      </div>
+      <div id="auth-register" style="display:none">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="reg-name" placeholder="Vorname">
+        </div>
+        <div class="form-group">
+          <label>E-Mail</label>
+          <input type="email" id="reg-email" placeholder="deine@email.at" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Passwort</label>
+          <input type="password" id="reg-password" placeholder="min. 6 Zeichen" autocomplete="new-password">
+        </div>
+        <button class="btn-primary" onclick="doRegister()" id="btn-register">Konto erstellen</button>
+        <p class="auth-msg" id="register-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div id="screen-main" class="screen">
+    <div class="topnav">
+      <span class="topnav-logo">hlpnhands</span>
+      <div class="topnav-actions">
+        <button class="icon-btn" onclick="showScreen('profile')" title="Profil">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="notif-banner" class="notif-banner" style="display:none">
+      <p>Benachrichtigungen aktivieren und als Erste informiert werden.</p>
+      <button class="btn-notif" onclick="requestNotifications()">Aktivieren</button>
+    </div>
+
+    <div class="feed-filter">
+      <button class="filter-chip active" onclick="setFilter('alle', this)">Alle</button>
+      <button class="filter-chip" onclick="setFilter('angebot', this)">Angebote</button>
+      <button class="filter-chip" onclick="setFilter('gesuch', this)">Gesuche</button>
+      <button class="filter-chip" onclick="setFilter('haushalt', this)">Haushalt</button>
+      <button class="filter-chip" onclick="setFilter('transport', this)">Transport</button>
+      <button class="filter-chip" onclick="setFilter('gesellschaft', this)">Gesellschaft</button>
+      <button class="filter-chip" onclick="setFilter('sonstiges', this)">Sonstiges</button>
+    </div>
+
+    <div class="feed-content" id="feed-content">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+
+    <button class="fab" onclick="showScreen('post')" title="Neuer Post">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+
+    <nav class="bottomnav">
+      <button class="nav-item active" onclick="setTab('feed', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Feed
+      </button>
+      <button class="nav-item" onclick="setTab('meine', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Meine
+      </button>
+      <button class="nav-item" onclick="setTab('umkreis', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg>
+        Umkreis
+      </button>
+    </nav>
+  </div>
+
+  <!-- POST SCREEN -->
+  <div id="screen-post" class="screen">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('main')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Neuer Post</h2>
+    </div>
+
+    <div class="form-body">
+      <div class="form-field">
+        <label>Was möchtest du?</label>
+        <div class="type-selector">
+          <div class="type-option angebot selected" id="type-angebot" onclick="selectType('angebot')">
+            <div class="type-icon">🤝</div>
+            <div class="type-label">Ich biete</div>
+            <div class="type-sub">Hilfe anbieten</div>
+          </div>
+          <div class="type-option gesuch" id="type-gesuch" onclick="selectType('gesuch')">
+            <div class="type-icon">🙋</div>
+            <div class="type-label">Ich suche</div>
+            <div class="type-sub">Hilfe benötigen</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Titel</label>
+        <input type="text" id="post-title" placeholder="z.B. Helfe beim Einkaufen" maxlength="80">
+      </div>
+
+      <div class="form-field">
+        <label>Beschreibung</label>
+        <textarea id="post-desc" placeholder="Was genau bietest oder suchst du? Wann? Wie oft?"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label>Kategorie</label>
+        <select id="post-category">
+          <option value="haushalt">Haushalt & Reinigung</option>
+          <option value="transport">Transport & Einkaufen</option>
+          <option value="gesellschaft">Gesellschaft & Gespräch</option>
+          <option value="handwerk">Handwerk & Reparatur</option>
+          <option value="digital">Digital & Technik</option>
+          <option value="kinder">Kinder & Familie</option>
+          <option value="tiere">Tiere</option>
+          <option value="sonstiges">Sonstiges</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Ort</label>
+        <div class="location-field">
+          <input type="text" id="post-location" placeholder="z.B. Kufstein">
+          <button class="btn-locate" onclick="getLocation()">📍 Standort</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn-primary" onclick="submitPost()" id="btn-submit">Post veröffentlichen</button>
+    </div>
+  </div>
+
+  <!-- PROFILE SCREEN -->
+  <div id="screen-profile" class="screen">
+    <div class="profile-header">
+      <div class="avatar" id="profile-avatar">?</div>
+      <div class="profile-name" id="profile-name">Lädt...</div>
+      <div class="profile-email" id="profile-email"></div>
+    </div>
+    <div class="profile-body">
+      <p class="profile-section-title">Benachrichtigungen</p>
+      <div class="profile-card">
+        <div class="profile-item" onclick="requestNotifications()">
+          <div class="profile-item-left">
+            <div class="profile-item-icon">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div>
+              <div class="profile-item-label">Benachrichtigungen</div>
+              <div class="profile-item-sub" id="notif-status">Status prüfen...</div>
+            </div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <p class="profile-section-title">Konto</p>
+      <div class="profile-card">
+        <div class="profile-item">
+          <div class="profile-item-left">
+            <div class="profile-item-icon">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <div>
+              <div class="profile-item-label">Profil bearbeiten</div>
+              <div class="profile-item-sub">Name, Ort, Kontakt</div>
+            </div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="profile-item">
+          <div class="profile-item-left">
+            <div class="profile-item-icon">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </div>
+            <div>
+              <div class="profile-item-label">Meine Posts</div>
+              <div class="profile-item-sub">Alle deine Angebote & Gesuche</div>
+            </div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="doLogout()">Abmelden</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kteebaojjjnqlrlwfxdg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_f585xpjZ9-gPnAjdsGnWDw_bk_hMzXX';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentFilter = 'alle';
+let selectedType = 'angebot';
+let userLat = null, userLng = null;
+
+// INIT
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    showScreen('main');
+    loadFeed();
+    checkNotifPermission();
+    updateProfile();
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+      showScreen('main');
+      loadFeed();
+      checkNotifPermission();
+      updateProfile();
+    }
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      showScreen('auth');
+    }
+  });
+
+  navigator.geolocation?.getCurrentPosition(pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+  });
+}
+
+// SCREENS
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'main') loadFeed();
+}
+
+// AUTH
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const msg = document.getElementById('login-msg');
+  const btn = document.getElementById('btn-login');
+
+  if (!email || !password) { msg.textContent = 'Bitte alle Felder ausfüllen.'; msg.className = 'auth-msg error'; return; }
+
+  btn.disabled = true; btn.textContent = 'Anmelden...';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    msg.textContent = 'Falsche E-Mail oder Passwort.';
+    msg.className = 'auth-msg error';
+  }
+  btn.disabled = false; btn.textContent = 'Anmelden';
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const msg = document.getElementById('register-msg');
+  const btn = document.getElementById('btn-register');
+
+  if (!name || !email || !password) { msg.textContent = 'Bitte alle Felder ausfüllen.'; msg.className = 'auth-msg error'; return; }
+  if (password.length < 6) { msg.textContent = 'Passwort muss min. 6 Zeichen haben.'; msg.className = 'auth-msg error'; return; }
+
+  btn.disabled = true; btn.textContent = 'Erstellen...';
+  const { error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+
+  if (error) {
+    msg.textContent = error.message;
+    msg.className = 'auth-msg error';
+  } else {
+    msg.textContent = 'Konto erstellt! Bitte E-Mail bestätigen.';
+    msg.className = 'auth-msg success';
+  }
+  btn.disabled = false; btn.textContent = 'Konto erstellen';
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  showToast('Abgemeldet.');
+}
+
+// FEED
+async function loadFeed() {
+  const el = document.getElementById('feed-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  let query = sb.from('posts').select('*').eq('active', true).order('created_at', { ascending: false });
+
+  if (currentFilter === 'angebot' || currentFilter === 'gesuch') {
+    query = query.eq('type', currentFilter);
+  } else if (currentFilter !== 'alle') {
+    query = query.eq('category', currentFilter);
+  }
+
+  const { data, error } = await query.limit(50);
+
+  if (error) {
+    el.innerHTML = '<div class="empty-state"><p>Fehler beim Laden. Bitte neu laden.</p></div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <h3>Noch keine Posts</h3>
+        <p>Sei der Erste! Erstelle ein Angebot oder ein Gesuch.</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = data.map((p, i) => renderCard(p, i)).join('');
+}
+
+function renderCard(p, i) {
+  const ago = timeAgo(p.created_at);
+  const typeLabel = p.type === 'angebot' ? '🤝 Angebot' : '🙋 Gesuch';
+  return `
+    <div class="post-card" style="animation-delay:${i*0.05}s">
+      <div class="post-header">
+        <span class="post-type ${p.type}">${typeLabel}</span>
+        ${p.location_name ? `<span class="post-distance">📍 ${p.location_name}</span>` : ''}
+      </div>
+      <div class="post-title">${escHtml(p.title)}</div>
+      ${p.description ? `<div class="post-desc">${escHtml(p.description)}</div>` : ''}
+      <div class="post-footer">
+        <span class="post-category">${categoryLabel(p.category)}</span>
+        <span class="post-time">${ago}</span>
+      </div>
+    </div>`;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadFeed();
+}
+
+function setTab(tab, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'meine') loadMyPosts();
+}
+
+async function loadMyPosts() {
+  if (!currentUser) return;
+  const el = document.getElementById('feed-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('posts').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if (!data || data.length === 0) {
+    el.innerHTML = `<div class="empty-state"><h3>Noch keine Posts</h3><p>Du hast noch keine Angebote oder Gesuche erstellt.</p></div>`;
+    return;
+  }
+  el.innerHTML = data.map((p, i) => renderCard(p, i)).join('');
+}
+
+// POST FORM
+function selectType(t) {
+  selectedType = t;
+  document.getElementById('type-angebot').classList.toggle('selected', t === 'angebot');
+  document.getElementById('type-gesuch').classList.toggle('selected', t === 'gesuch');
+}
+
+function getLocation() {
+  if (!navigator.geolocation) { showToast('Standort nicht verfügbar'); return; }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`);
+      const d = await r.json();
+      const city = d.address.city || d.address.town || d.address.village || d.address.county || '';
+      document.getElementById('post-location').value = city;
+    } catch {
+      document.getElementById('post-location').value = `${userLat.toFixed(3)}, ${userLng.toFixed(3)}`;
+    }
+    showToast('Standort erkannt');
+  }, () => showToast('Standort konnte nicht ermittelt werden'));
+}
+
+async function submitPost() {
+  if (!currentUser) return;
+  const title = document.getElementById('post-title').value.trim();
+  const desc = document.getElementById('post-desc').value.trim();
+  const category = document.getElementById('post-category').value;
+  const location = document.getElementById('post-location').value.trim();
+
+  if (!title) { showToast('Bitte einen Titel eingeben'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = 'Wird veröffentlicht...';
+
+  const { error } = await sb.from('posts').insert({
+    user_id: currentUser.id,
+    type: selectedType,
+    title,
+    description: desc,
+    category,
+    location_name: location,
+    lat: userLat,
+    lng: userLng,
+    active: true
+  });
+
+  btn.disabled = false; btn.textContent = 'Post veröffentlichen';
+
+  if (error) {
+    showToast('Fehler: ' + error.message);
+  } else {
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-desc').value = '';
+    document.getElementById('post-location').value = '';
+    showToast('Post veröffentlicht! 🎉');
+    showScreen('main');
+  }
+}
+
+// PROFILE
+function updateProfile() {
+  if (!currentUser) return;
+  const name = currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || 'Nutzer';
+  const initial = name.charAt(0).toUpperCase();
+  document.getElementById('profile-avatar').textContent = initial;
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('profile-email').textContent = currentUser.email;
+}
+
+// NOTIFICATIONS
+function checkNotifPermission() {
+  if (!('Notification' in window)) return;
+  const banner = document.getElementById('notif-banner');
+  const status = document.getElementById('notif-status');
+  if (Notification.permission === 'default') {
+    banner.style.display = 'flex';
+    status.textContent = 'Nicht aktiviert';
+  } else if (Notification.permission === 'granted') {
+    banner.style.display = 'none';
+    status.textContent = 'Aktiviert ✓';
+  } else {
+    banner.style.display = 'none';
+    status.textContent = 'Blockiert – Browser-Einstellungen prüfen';
+  }
+}
+
+function requestNotifications() {
+  if (!('Notification' in window)) { showToast('Nicht unterstützt'); return; }
+  Notification.requestPermission().then(p => {
+    checkNotifPermission();
+    if (p === 'granted') showToast('Benachrichtigungen aktiviert ✓');
+  });
+}
+
+// UTILS
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return 'gerade eben';
+  if (diff < 3600) return Math.floor(diff/60) + ' Min.';
+  if (diff < 86400) return Math.floor(diff/3600) + ' Std.';
+  return Math.floor(diff/86400) + ' Tage';
+}
+
+function categoryLabel(c) {
+  const map = { haushalt:'Haushalt', transport:'Transport', gesellschaft:'Gesellschaft', handwerk:'Handwerk', digital:'Digital', kinder:'Familie', tiere:'Tiere', sonstiges:'Sonstiges' };
+  return map[c] || c;
+}
+
+init();
+</script>
+</body>
+</html>
