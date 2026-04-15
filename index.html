@@ -48,7 +48,7 @@
 
     /* NAV */
     .topnav { background: var(--navy); padding: 1rem 1.25rem 0.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .topnav-logo { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--cream); }
+    .topnav-logo { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--cream); letter-spacing: -0.3px; }
     .icon-btn { width: 38px; height: 38px; border: none; background: rgba(245,240,232,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cream); }
     .bottomnav { background: var(--white); border-top: 1px solid rgba(27,43,94,0.1); padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom)); display: flex; position: sticky; bottom: 0; z-index: 100; }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0.4rem; border: none; background: transparent; cursor: pointer; color: var(--text-muted); font-family: 'Poppins', sans-serif; font-size: 0.65rem; font-weight: 500; transition: color 0.2s; }
@@ -185,16 +185,7 @@
   <!-- MAIN -->
   <div id="screen-main" class="screen">
     <div class="topnav">
-      <span class="topnav-logo" onclick="setTab('feed', document.getElementById('tab-feed'))" style="cursor:pointer; display:flex; align-items:center; gap:0.6rem;">
-        <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="46" stroke="#f5f0e8" stroke-width="5"/>
-          <path d="M30 62 C30 62 35 52 50 52 C65 52 70 62 70 62" stroke="#f5f0e8" stroke-width="4" stroke-linecap="round" fill="none"/>
-          <path d="M35 55 Q30 48 38 44 Q46 40 50 46 Q54 40 62 44 Q70 48 65 55" stroke="#f5f0e8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-          <path d="M50 46 L50 38" stroke="#f5f0e8" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="50" cy="33" r="4" fill="#f5f0e8"/>
-        </svg>
-        hlpnhands
-      </span>
+      <span class="topnav-logo" onclick="setTab('feed', document.getElementById('tab-feed'))" style="cursor:pointer;">hlpnhands</span>
       <button class="icon-btn" onclick="showScreen('profile')">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </button>
@@ -537,7 +528,7 @@ async function loadFeed() {
   const { data, error } = await query.limit(50);
   if (error) { el.innerHTML='<div class="empty-state"><p>Fehler beim Laden.</p></div>'; return; }
   if (!data||data.length===0) {
-    el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Noch nichts hier – erstelle das erste Angebot oder Gesuch! Erstelle ein Angebot oder ein Gesuch.</p></div>`;
+    el.innerHTML=`<div class="empty-state"><h3>Noch keine Posts</h3><p>Sei die Erste:r – erstelle ein Angebot oder Gesuch!</p></div>`;
     return;
   }
   el.innerHTML = data.map((p,i) => renderCard(p,i)).join('');
