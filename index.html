@@ -781,6 +781,46 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    .post-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(27,43,94,0.06);
+    }
+
+    .btn-edit {
+      flex: 1;
+      padding: 0.45rem;
+      background: transparent;
+      border: 1.5px solid var(--navy);
+      border-radius: var(--radius-sm);
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-edit:hover { background: var(--navy); color: var(--cream); }
+
+    .btn-delete {
+      flex: 1;
+      padding: 0.45rem;
+      background: transparent;
+      border: 1.5px solid rgba(192,57,43,0.4);
+      border-radius: var(--radius-sm);
+      color: #c0392b;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover { background: rgba(192,57,43,0.08); }
   </style>
 </head>
 <body>
@@ -1139,11 +1179,21 @@ async function loadFeed() {
   el.innerHTML = data.map((p, i) => renderCard(p, i)).join('');
 }
 
+function isAdmin() {
+  return currentUser && currentUser.email === 'mail2christinriedel@gmail.com';
+}
+
 function renderCard(p, i) {
   const ago = timeAgo(p.created_at);
   const typeLabel = p.type === 'angebot' ? '🤝 Angebot' : '🙋 Gesuch';
+  const isOwner = currentUser && (p.user_id === currentUser.id || isAdmin());
+  const ownerActions = isOwner ? `
+      <div class="post-actions">
+        <button class="btn-edit" onclick="openEditPost('${p.id}')">Bearbeiten</button>
+        <button class="btn-delete" onclick="deletePost('${p.id}')">Löschen</button>
+      </div>` : '';
   return `
-    <div class="post-card" style="animation-delay:${i*0.05}s">
+    <div class="post-card" id="card-${p.id}" style="animation-delay:${i*0.05}s">
       <div class="post-header">
         <span class="post-type ${p.type}">${typeLabel}</span>
         ${p.location_name ? `<span class="post-distance">📍 ${p.location_name}</span>` : ''}
@@ -1154,7 +1204,35 @@ function renderCard(p, i) {
         <span class="post-category">${categoryLabel(p.category)}</span>
         <span class="post-time">${ago}</span>
       </div>
+      ${ownerActions}
     </div>`;
+}
+
+let editingPostId = null;
+
+function openEditPost(id) {
+  editingPostId = id;
+  showScreen('post');
+  // load post data
+  sb.from('posts').select('*').eq('id', id).single().then(({data}) => {
+    if (!data) return;
+    selectedType = data.type;
+    document.getElementById('type-angebot').classList.toggle('selected', data.type === 'angebot');
+    document.getElementById('type-gesuch').classList.toggle('selected', data.type === 'gesuch');
+    document.getElementById('post-title').value = data.title || '';
+    document.getElementById('post-desc').value = data.description || '';
+    document.getElementById('post-category').value = data.category || 'sonstiges';
+    document.getElementById('post-location').value = data.location_name || '';
+    document.getElementById('btn-submit').textContent = 'Änderungen speichern';
+  });
+}
+
+async function deletePost(id) {
+  if (!confirm('Post wirklich löschen?')) return;
+  const { error } = await sb.from('posts').delete().eq('id', id);
+  if (error) { showToast('Fehler beim Löschen'); return; }
+  showToast('Post gelöscht.');
+  loadFeed();
 }
 
 function setFilter(f, el) {
@@ -1191,19 +1269,24 @@ function selectType(t) {
 
 function getLocation() {
   if (!navigator.geolocation) { showToast('Standort nicht verfügbar'); return; }
+  showToast('Standort wird ermittelt...');
   navigator.geolocation.getCurrentPosition(async pos => {
     userLat = pos.coords.latitude;
     userLng = pos.coords.longitude;
     try {
-      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`);
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&accept-language=de`);
       const d = await r.json();
-      const city = d.address.city || d.address.town || d.address.village || d.address.county || '';
+      const city = d.address.city || d.address.town || d.address.village || d.address.county || d.address.state || '';
       document.getElementById('post-location').value = city;
+      showToast('Standort erkannt: ' + city);
     } catch {
       document.getElementById('post-location').value = `${userLat.toFixed(3)}, ${userLng.toFixed(3)}`;
+      showToast('Standort gesetzt');
     }
-    showToast('Standort erkannt');
-  }, () => showToast('Standort konnte nicht ermittelt werden'));
+  }, (err) => {
+    if (err.code === 1) showToast('Bitte Standort in Browser-Einstellungen erlauben');
+    else showToast('Standort konnte nicht ermittelt werden');
+  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
 }
 
 async function submitPost() {
@@ -1216,19 +1299,19 @@ async function submitPost() {
   if (!title) { showToast('Bitte einen Titel eingeben'); return; }
 
   const btn = document.getElementById('btn-submit');
-  btn.disabled = true; btn.textContent = 'Wird veröffentlicht...';
+  btn.disabled = true; btn.textContent = editingPostId ? 'Speichern...' : 'Wird veröffentlicht...';
 
-  const { error } = await sb.from('posts').insert({
-    user_id: currentUser.id,
-    type: selectedType,
-    title,
-    description: desc,
-    category,
-    location_name: location,
-    lat: userLat,
-    lng: userLng,
-    active: true
-  });
+  let error;
+  if (editingPostId) {
+    ({ error } = await sb.from('posts').update({
+      type: selectedType, title, description: desc, category, location_name: location
+    }).eq('id', editingPostId));
+  } else {
+    ({ error } = await sb.from('posts').insert({
+      user_id: currentUser.id, type: selectedType, title, description: desc,
+      category, location_name: location, lat: userLat, lng: userLng, active: true
+    }));
+  }
 
   btn.disabled = false; btn.textContent = 'Post veröffentlichen';
 
@@ -1238,7 +1321,8 @@ async function submitPost() {
     document.getElementById('post-title').value = '';
     document.getElementById('post-desc').value = '';
     document.getElementById('post-location').value = '';
-    showToast('Post veröffentlicht! 🎉');
+    editingPostId = null;
+    showToast(editingPostId ? 'Gespeichert!' : 'Post veröffentlicht! 🎉');
     showScreen('main');
   }
 }
