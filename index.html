@@ -116,6 +116,10 @@
     .contact-box h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--navy); margin-bottom: 1rem; }
     .contact-box textarea { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--cream-dark); border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-size: 0.9rem; background: var(--cream); color: var(--text); outline: none; resize: none; min-height: 90px; line-height: 1.5; }
 
+    /* PENDING NOTICE */
+    .pending-notice { background: rgba(232,130,90,0.1); border: 1.5px solid rgba(232,130,90,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+    .pending-notice p { font-size: 0.85rem; color: var(--accent); line-height: 1.5; font-weight: 500; }
+
     /* PROFILE */
     #screen-profile { background: var(--cream); overflow-y: auto; }
     .profile-header { background: var(--navy); padding: 2rem 1.25rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
@@ -547,12 +551,14 @@ function renderCard(p, i) {
   const typeLabel = p.type==='angebot' ? '🤝 Angebot' : '🙋 Gesuch';
   const isOwner = currentUser && (p.user_id===currentUser.id || isAdmin());
   const loc = [p.land, p.plz, p.location_name].filter(Boolean).join(' ');
+  const isPending = !p.active && isOwner;
   return `
     <div class="post-card" style="animation-delay:${i*0.05}s" onclick="openDetail('${p.id}')">
       <div class="post-header">
         <span class="post-type ${p.type}">${typeLabel}</span>
         ${loc ? `<span class="post-distance">📍 ${escHtml(loc)}</span>` : ''}
       </div>
+      ${isPending ? `<div class="pending-notice" onclick="event.stopPropagation()"><p>⏳ Wird geprüft – dein Inserat ist noch nicht öffentlich sichtbar.</p></div>` : ''}
       <div class="post-title">${escHtml(p.title)}</div>
       ${p.description ? `<div class="post-desc">${escHtml(p.description)}</div>` : ''}
       <div class="post-footer">
@@ -582,6 +588,7 @@ async function openDetail(id) {
       <span class="post-type ${p.type}">${typeLabel}</span>
       <span style="font-size:0.78rem;color:var(--text-muted)">${timeAgo(p.created_at)}</span>
     </div>
+    ${!p.active && isOwn ? `<div class="pending-notice"><p>⏳ Dein Inserat wird gerade geprüft und ist noch nicht öffentlich sichtbar. Du bekommst eine Benachrichtigung sobald es freigegeben wurde.</p></div>` : ''}
     <div class="detail-title">${escHtml(p.title)}</div>
     ${p.description ? `<div class="detail-desc">${escHtml(p.description)}</div>` : ''}
     <div class="detail-meta">
@@ -669,13 +676,17 @@ async function submitPost() {
   btn.disabled=true; btn.textContent=editingPostId ? 'Speichern...' : 'Wird veröffentlicht...';
   const postData = { type: selectedType, title, description: desc||null, category, price: price||null, price_type: priceType, location_name: location||null, plz: plz||null, land };
   let error;
-  if (editingPostId) { ({ error } = await sb.from('posts').update(postData).eq('id', editingPostId)); }
-  else { ({ error } = await sb.from('posts').insert({ ...postData, user_id: currentUser.id, active: true })); }
+  if (editingPostId) {
+    ({ error } = await sb.from('posts').update(postData).eq('id', editingPostId));
+  } else {
+    // active wird NICHT gesetzt – Supabase Default false greift automatisch
+    ({ error } = await sb.from('posts').insert({ ...postData, user_id: currentUser.id }));
+  }
   btn.disabled=false; btn.textContent='Post veröffentlichen';
   if (error) { showToast('Fehler: ' + error.message); return; }
   const wasEditing = !!editingPostId;
   editingPostId = null;
-  showToast(wasEditing ? 'Gespeichert! ✓' : 'Post veröffentlicht! 🎉');
+  showToast(wasEditing ? 'Gespeichert! ✓' : 'Gesendet – wird geprüft 🎉');
   goBackFromPost();
 }
 
